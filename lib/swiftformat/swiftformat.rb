@@ -16,6 +16,13 @@ module Danger
       @repo_root = `git rev-parse --show-toplevel`.strip
       @current_dir = Dir.pwd
 
+      # If git thinks the current dir IS the repo root, check for a parent repo.
+      # This handles stale .git files in subdirectories of monorepos.
+      if @repo_root == @current_dir
+        parent_root = `git -C .. rev-parse --show-toplevel 2>/dev/null`.strip
+        @repo_root = parent_root unless parent_root.empty?
+      end
+
       repo_root_path = Pathname.new(@repo_root)
       current_dir_path = Pathname.new(@current_dir)
 

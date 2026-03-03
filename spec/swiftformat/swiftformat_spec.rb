@@ -53,6 +53,19 @@ RSpec.describe Danger::SwiftFormat do
       @sut.check_format(%w(kmp/app/ios/iosApp/AppSample.swift))
     end
 
+    it "should detect parent repo root when a stale .git exists in the subdirectory" do
+      # Simulate a stale .git in ios/ making git think ios/ is the repo root
+      allow(@sut).to receive(:`).with("git rev-parse --show-toplevel").and_return("/repo/ios\n")
+      allow(@sut).to receive(:`).with("git -C .. rev-parse --show-toplevel 2>/dev/null").and_return("/repo\n")
+      allow(Dir).to receive(:pwd).and_return("/repo/ios")
+
+      expect(@cmd).to receive(:run)
+        .with(%w(swiftformat setup.swift --lint --lenient))
+        .and_return(fixture("swiftformat_output.txt"))
+
+      @sut.check_format(%w(ios/setup.swift))
+    end
+
     it "should return a formatted output including rules when there are errors" do
       expect(@cmd).to receive(:run)
         .with(%w(swiftformat . --lint --lenient))
