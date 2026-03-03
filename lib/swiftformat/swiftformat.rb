@@ -31,6 +31,12 @@ module Danger
       # so we convert repo-root-relative paths into paths relative to the current dir.
       adjusted_files = files.map { |file| adjust_file_path(file, repo_root_path, current_dir_path) }
 
+      # DEBUG: Log path resolution details to help diagnose CI issues
+      $stderr.puts "[SwiftFormat DEBUG] repo_root=#{@repo_root.inspect}"
+      $stderr.puts "[SwiftFormat DEBUG] current_dir=#{@current_dir.inspect}"
+      $stderr.puts "[SwiftFormat DEBUG] input_files=#{files.inspect}"
+      $stderr.puts "[SwiftFormat DEBUG] adjusted_files=#{adjusted_files.inspect}"
+
       cmd = [@path] + adjusted_files
       cmd << additional_args.split unless additional_args.nil? || additional_args.empty?
 
